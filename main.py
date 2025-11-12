@@ -20,11 +20,11 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    # Don't respond to itself
+    # Ignore bot messages
     if message.author == bot.user:
         return
 
-    # Only react when the bot is mentioned (pinged)
+    # Only react if the bot is mentioned
     if bot.user not in message.mentions:
         return
 
@@ -33,7 +33,7 @@ async def on_message(message):
         await message.channel.send("👋 Please upload a screenshot of the anime when pinging me!")
         return
 
-    # Make sure it's in the right type of channel (not DM)
+    # Make sure it's in a server channel (not DMs)
     if not hasattr(message.channel, "name"):
         await message.channel.send("❌ Please use me in a server channel, not DMs.")
         return
@@ -43,7 +43,6 @@ async def on_message(message):
         await message.channel.send(f"⚠️ Please use me in the #{CHANNEL_NAME} channel.")
         return
 
-    # Process each image
     for attachment in message.attachments:
         if attachment.content_type and attachment.content_type.startswith("image"):
             await message.channel.send("🔍 Searching for the anime... please wait!")
@@ -62,17 +61,26 @@ async def on_message(message):
 
                         data = await resp.json()
 
-                        if not data["result"]:
+                        if not data.get("result"):
                             await message.channel.send("😢 Couldn't find any match.")
                             return
 
                         result = data["result"][0]
-                        anime_title = result["anime"]
+
+                        # Safely get anime title
+                        anime_title = (
+                            result.get("anime")
+                            or result.get("title")
+                            or result.get("title_english")
+                            or result.get("filename")
+                            or "Unknown Title"
+                        )
+
                         episode = result.get("episode", "?")
-                        similarity = round(result["similarity"] * 100, 2)
-                        from_time = result["from"]
-                        video_url = result["video"]
-                        image_url = result["image"]
+                        similarity = round(result.get("similarity", 0) * 100, 2)
+                        from_time = result.get("from", 0)
+                        video_url = result.get("video", "No video available")
+                        image_url = result.get("image", None)
 
                         msg = (
                             f"🎬 **Anime:** {anime_title}\n"
@@ -83,7 +91,11 @@ async def on_message(message):
                         )
 
                         await message.channel.send(msg)
-                        await message.channel.send(image_url)
+                        if image_url:
+                            await message.channel.send(image_url)
 
             except Exception as e:
                 await message.channel.send(f"⚠️ Oops! Something went wrong: `{e}`")
+
+# ✅ Don't forget this line to actually start the bot!
+bot.run(TOKEN)
