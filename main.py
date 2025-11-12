@@ -69,7 +69,7 @@ async def ping(interaction: discord.Interaction):
     embed.add_field(name="📡 Ping", value=f"`{system_ping}ms`", inline=False)
     embed.add_field(name="└─ WebSocket", value=f"`{ws_latency}ms`", inline=True)
     embed.add_field(name="└─ System", value=f"`{system_ping}ms`", inline=True)
-    embed.set_footer(text="Mitsukeru Bot • discord.py v2.x • Powered by Zenyx & trace.moe")
+    embed.set_footer(text="Mitsukeru Bot • discord.py v2.x • Powered by Zenyx & Otaku Enkai")
 
     await interaction.followup.send(embed=embed)
 
