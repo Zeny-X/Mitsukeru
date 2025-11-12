@@ -1,31 +1,45 @@
 import discord
+from discord import app_commands
 import aiohttp
 import io
 import os
 import re
+import time
 from datetime import timedelta
+from keep_alive import keep_alive   # make sure keep_alive.py is in the same folder
 
-TOKEN = os.getenv("DISCORD_TOKEN")
+TOKEN = os.getenv("DISCORD_TOKEN")        # your bot token in Replit Secrets
 CHANNEL_NAME = "find-anime🔍"
 TRACE_API_URL = "https://api.trace.moe/search"
+BOT_VERSION = "1.0.0"
+START_TIME = time.time()
 
+# ---------- Discord setup ----------
 intents = discord.Intents.default()
 intents.message_content = True
 intents.messages = True
 intents.guilds = True
-bot = discord.Client(intents=intents)
 
+class MitsukeruBot(discord.Client):
+    def __init__(self):
+        super().__init__(intents=intents)
+        self.tree = app_commands.CommandTree(self)
+
+    async def on_ready(self):
+        await self.tree.sync()
+        print(f"✅ Logged in as {self.user}")
+
+bot = MitsukeruBot()
+
+# ---------- Helpers ----------
 def clean_title(raw):
-    """Clean file-like titles and keep something readable."""
     if not raw:
         return "Unknown Title"
     cleaned = re.sub(r"[\[\(].*?[\]\)]", "", raw)
     cleaned = re.sub(r"[_\.]", " ", cleaned)
     cleaned = re.sub(r"(x264|aac|dvdrip|mp4|mkv|cht|chs|jpn|eng)", "", cleaned, flags=re.I)
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
-    # Try to keep at least one normal word
     if len(cleaned) < 2:
-        # extract words from inside the brackets as fallback
         alt = re.findall(r"[A-Za-z0-9]+", raw)
         cleaned = " ".join([w for w in alt if len(w) > 2]) or "Unknown Title"
     return cleaned
@@ -33,10 +47,33 @@ def clean_title(raw):
 def sec_to_hms(seconds: float):
     return str(timedelta(seconds=int(seconds)))
 
-@bot.event
-async def on_ready():
-    print(f"✅ Logged in as {bot.user}")
+# ---------- /ping ----------
+@bot.tree.command(name="ping", description="Check Mitsukeru’s connection and latency.")
+async def ping(interaction: discord.Interaction):
+    start = time.perf_counter()
+    await interaction.response.defer(thinking=True)
+    end = time.perf_counter()
+    system_ping = round((end - start) * 1000, 2)
 
+    ws_latency = round(bot.latency * 1000, 2)
+    uptime_sec = time.time() - START_TIME
+    uptime_str = str(timedelta(seconds=int(uptime_sec)))
+
+    embed = discord.Embed(
+        title="🌸 Mitsukeru Status 🌸",
+        description="**Mitsukeru is online and running smoothly!**",
+        color=discord.Color.green()
+    )
+    embed.add_field(name="🧩 Version", value=f"`{BOT_VERSION}`", inline=True)
+    embed.add_field(name="🕐 Last Restart", value=f"`{uptime_str}` ago", inline=True)
+    embed.add_field(name="📡 Ping", value=f"`{system_ping}ms`", inline=False)
+    embed.add_field(name="└─ WebSocket", value=f"`{ws_latency}ms`", inline=True)
+    embed.add_field(name="└─ System", value=f"`{system_ping}ms`", inline=True)
+    embed.set_footer(text="Mitsukeru Bot • discord.py v2.x • Powered by Zenyx & trace.moe")
+
+    await interaction.followup.send(embed=embed)
+
+# ---------- on_message (anime search + ping mention) ----------
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -44,7 +81,6 @@ async def on_message(message):
     if bot.user not in message.mentions:
         return
 
-    # ---- Greeting if just pinged ----
     if not message.attachments:
         greet = (
             "👋 **Konnichiwa!** I’m **Mitsukeru** by **Zenyx**!\n"
@@ -103,17 +139,16 @@ async def on_message(message):
                 )
                 if image_url:
                     embed.set_thumbnail(url=image_url)
-                embed.set_footer(text="Powered by trace.moe • Mitsukeru Bot")
+                embed.set_footer(text="Powered by Otaku Enkai • Mitsukeru Bot")
 
                 await message.channel.send(embed=embed)
 
-                # ---- Try to send the preview clip as a file ----
                 if video_url:
                     async with aiohttp.ClientSession() as session:
                         async with session.get(video_url) as vid_resp:
                             if vid_resp.status == 200:
                                 vid_data = await vid_resp.read()
-                                if len(vid_data) < 8 * 1024 * 1024:  # under 8 MB
+                                if len(vid_data) < 8 * 1024 * 1024:
                                     await message.channel.send(
                                         file=discord.File(io.BytesIO(vid_data), filename="preview.mp4")
                                     )
@@ -125,4 +160,6 @@ async def on_message(message):
             except Exception as e:
                 await message.channel.send(f"⚠️ Oops! Something went wrong: `{e}`")
 
+# ---------- Run ----------
+keep_alive()
 bot.run(TOKEN)
