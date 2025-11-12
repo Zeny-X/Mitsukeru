@@ -16,19 +16,22 @@ intents.guilds = True
 bot = discord.Client(intents=intents)
 
 def clean_title(raw):
-    """Clean file-like titles and keep something readable."""
+    """Remove junk from filenames and keep readable anime name."""
     if not raw:
         return "Unknown Title"
+    # Remove brackets, parentheses, underscores, dots
     cleaned = re.sub(r"[\[\(].*?[\]\)]", "", raw)
     cleaned = re.sub(r"[_\.]", " ", cleaned)
-    cleaned = re.sub(r"(x264|aac|dvdrip|mp4|mkv|cht|chs|jpn|eng)", "", cleaned, flags=re.I)
+    # Remove junk like codec tags, numbers, episode codes
+    cleaned = re.sub(r"\b(x264|aac|dvdrip|mp4|mkv|cht|chs|jpn|eng|1080p|720p|480p)\b", "", cleaned, flags=re.I)
+    # Remove long numbers or episode-like fragments
+    cleaned = re.sub(r"\b\d{2,4}\b", "", cleaned)
+    # Trim and fix spacing
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
-    # Try to keep at least one normal word
-    if len(cleaned) < 2:
-        # extract words from inside the brackets as fallback
-        alt = re.findall(r"[A-Za-z0-9]+", raw)
-        cleaned = " ".join([w for w in alt if len(w) > 2]) or "Unknown Title"
-    return cleaned
+    # Capitalize first letters properly
+    cleaned = cleaned.title()
+    # Fallback
+    return cleaned or "Unknown Title"
 
 def sec_to_hms(seconds: float):
     return str(timedelta(seconds=int(seconds)))
@@ -44,7 +47,7 @@ async def on_message(message):
     if bot.user not in message.mentions:
         return
 
-    # ---- Greeting if just pinged ----
+    # ---- Greeting when just pinged ----
     if not message.attachments:
         greet = (
             "👋 **Konnichiwa!** I’m **Mitsukeru** by **Zenyx**!\n"
@@ -78,13 +81,13 @@ async def on_message(message):
                     return
 
                 result = data["result"][0]
-                raw_title = (
-                    result.get("anime")
-                    or result.get("title")
-                    or result.get("title_english")
-                    or result.get("filename")
-                )
-                anime_title = clean_title(raw_title)
+
+                # Extract all possible title fields
+                raw_title = result.get("filename") or "Unknown Title"
+                anime_title = clean_title(result.get("anime") or raw_title)
+                romaji_title = result.get("title_romaji") or anime_title
+                english_title = result.get("title_english") or clean_title(raw_title)
+
                 episode = result.get("episode", "?")
                 similarity = round(result.get("similarity", 0) * 100, 2)
                 from_time = result.get("from", 0)
@@ -92,28 +95,32 @@ async def on_message(message):
                 image_url = result.get("image", None)
                 time_str = sec_to_hms(from_time)
 
+                # Create Embed
                 embed = discord.Embed(
-                    title=f"🎬 {anime_title}",
+                    title="🎬 Anime Found!",
                     description=(
+                        f":flag_jp: **Romanji:** {romaji_title}\n"
+                        f":flag_us: **English:** {english_title}\n\n"
                         f"📺 **Episode:** {episode}\n"
                         f"⏱️ **Scene Time:** `{time_str}`\n"
                         f"🎯 **Similarity:** `{similarity}%`"
                     ),
                     color=discord.Color.blue()
                 )
+
                 if image_url:
                     embed.set_thumbnail(url=image_url)
                 embed.set_footer(text="Powered by trace.moe • Mitsukeru Bot")
 
                 await message.channel.send(embed=embed)
 
-                # ---- Try to send the preview clip as a file ----
+                # ---- Send preview clip ----
                 if video_url:
                     async with aiohttp.ClientSession() as session:
                         async with session.get(video_url) as vid_resp:
                             if vid_resp.status == 200:
                                 vid_data = await vid_resp.read()
-                                if len(vid_data) < 8 * 1024 * 1024:  # under 8 MB
+                                if len(vid_data) < 8 * 1024 * 1024:
                                     await message.channel.send(
                                         file=discord.File(io.BytesIO(vid_data), filename="preview.mp4")
                                     )
