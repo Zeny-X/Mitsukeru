@@ -3,8 +3,8 @@ import aiohttp
 import io
 import os
 
-TOKEN = os.getenv("DISCORD_TOKEN")  # We'll add this later in Secrets
-CHANNEL_NAME = "find-anime"
+TOKEN = os.getenv("DISCORD_TOKEN")  # Your bot token in Secrets
+CHANNEL_NAME = "find-anime🔍"  # your channel name
 TRACE_API_URL = "https://api.trace.moe/search"
 
 intents = discord.Intents.default()
@@ -20,17 +20,35 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    # Don't respond to itself
     if message.author == bot.user:
         return
 
-    if message.channel.name != CHANNEL_NAME:
+    # Only react when the bot is mentioned (pinged)
+    if bot.user not in message.mentions:
         return
 
-    if message.attachments:
-        for attachment in message.attachments:
-            if attachment.content_type and attachment.content_type.startswith("image"):
-                await message.channel.send("🔍 Searching for the anime... please wait!")
+    # Ignore if no attachments
+    if not message.attachments:
+        await message.channel.send("👋 Please upload a screenshot of the anime when pinging me!")
+        return
 
+    # Make sure it's in the right type of channel (not DM)
+    if not hasattr(message.channel, "name"):
+        await message.channel.send("❌ Please use me in a server channel, not DMs.")
+        return
+
+    # Optional: limit to specific channel name
+    if message.channel.name != CHANNEL_NAME:
+        await message.channel.send(f"⚠️ Please use me in the #{CHANNEL_NAME} channel.")
+        return
+
+    # Process each image
+    for attachment in message.attachments:
+        if attachment.content_type and attachment.content_type.startswith("image"):
+            await message.channel.send("🔍 Searching for the anime... please wait!")
+
+            try:
                 img_bytes = await attachment.read()
 
                 async with aiohttp.ClientSession() as session:
@@ -67,4 +85,5 @@ async def on_message(message):
                         await message.channel.send(msg)
                         await message.channel.send(image_url)
 
-bot.run(TOKEN)
+            except Exception as e:
+                await message.channel.send(f"⚠️ Oops! Something went wrong: `{e}`")
