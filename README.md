@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <a href="https://discord.com/developers/applications"><img src="https://img.shields.io/badge/Discord-Bot-5865F2?logo=discord&logoColor=white"></a>
+  <a href="[https://discord.com/developers/applications](https://discord.com/oauth2/authorize?client_id=1438175067606618183)"><img src="https://img.shields.io/badge/Discord-Bot-5865F2?logo=discord&logoColor=white"></a>
   <a href="https://trace.moe/"><img src="https://img.shields.io/badge/trace.moe-API-orange?logo=python&logoColor=white"></a>
   <img src="https://img.shields.io/badge/Language-Python_3.11-blue?logo=python">
   <img src="https://img.shields.io/badge/discord.py-v2.x-lightgrey?logo=discord">
