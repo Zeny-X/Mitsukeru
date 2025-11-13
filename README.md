@@ -32,8 +32,7 @@
 
 - 🖼️ **Screenshot → Anime Info!**  
   Instantly identify the anime, episode, scene time, and get a preview clip.
-- ⚙️ **Powered by [trace.moe](https://trace.moe)** — advanced anime recognition.
-- 💬 **Anime personality!** Mitsukeru speaks like your friendly anime buddy.
+- ⚙️ **Powered by [trace moe]** — advanced anime recognition.
 - 🔧 **Slash Command:** `/ping` — check latency, uptime, and system status.
 - ☁️ **24/7 Hosting on Render** with UptimeRobot keep-alive.
 - 💎 **Clean Embed Design** — beautifully formatted Discord replies.
