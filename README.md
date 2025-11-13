@@ -1,32 +1,56 @@
-# 🌸 Mitsukeru — Anime Scene Finder Bot
+<!-- Banner -->
+<p align="center">
+  <img src="Banner.png" alt="Mitsukeru Banner" width="100%">
+</p>
 
-> **Developed by Zenyx for the _Otaku Enkai_ Discord Server.**  
-> Mitsukeru (見つける) helps you identify anime scenes from screenshots instantly!
+---
+
+<h2 align="center">🌸 Mitsukeru — Find Anime by Screenshot 🌸</h2>
+
+<p align="center">
+  <b>Developed with 💖 by <a href="https://discordapp.com/users/">zen_y.x</a> for the <i>Otaku Enkai</i> Discord Server.</b><br>
+  <i>“Find the anime you love — from just one picture!”</i>
+</p>
+
+---
+
+<p align="center">
+  <img src="Mitsukeru.png" alt="Mitsukeru Icon" width="220">
+</p>
+
+<p align="center">
+  <a href="https://discord.com/developers/applications"><img src="https://img.shields.io/badge/Discord-Bot-5865F2?logo=discord&logoColor=white"></a>
+  <a href="https://trace.moe/"><img src="https://img.shields.io/badge/trace.moe-API-orange?logo=python&logoColor=white"></a>
+  <img src="https://img.shields.io/badge/Language-Python_3.11-blue?logo=python">
+  <img src="https://img.shields.io/badge/discord.py-v2.x-lightgrey?logo=discord">
+  <img src="https://img.shields.io/badge/Hosted_on-Render-46E3B7?logo=render">
+</p>
 
 ---
 
 ## ✨ Features
 
-- 🖼️ Upload a screenshot → get the anime name, episode, time, and a preview clip!
-- 🎬 Powered by the Trace Moe API  
-- 💬 Friendly anime-style interactions  
-- ⚙️ Slash command `/ping` for bot status & latency  
-- ☁️ Hosted on Render for 24/7 uptime  
-- 💎 Built with **Python + discord.py + aiohttp**
+- 🖼️ **Screenshot → Anime Info!**  
+  Instantly identify the anime, episode, scene time, and get a preview clip.
+- ⚙️ **Powered by [trace.moe](https://trace.moe)** — advanced anime recognition.
+- 💬 **Anime personality!** Mitsukeru speaks like your friendly anime buddy.
+- 🔧 **Slash Command:** `/ping` — check latency, uptime, and system status.
+- ☁️ **24/7 Hosting on Render** with UptimeRobot keep-alive.
+- 💎 **Clean Embed Design** — beautifully formatted Discord replies.
 
 ---
 
-## 🚀 Setup & Deployment
+## 🧩 Commands
 
-### 1️⃣ Requirements
-- Python 3.10+
-- A Discord Bot Token (from [Discord Developer Portal](https://discord.com/developers/applications))
-- A [trace.moe](https://trace.moe/) API endpoint (free)
+| Command | Description |
+|----------|--------------|
+| `@Mitsukeru + Screenshot` | Finds anime name, episode, scene time & preview clip |
+| `/ping` | Checks Mitsukeru’s latency, uptime, and status |
 
-### 2️⃣ Local Setup (optional)
-```bash
-git clone https://github.com/<yourusername>/Mitsukeru.git
-cd Mitsukeru
-pip install -r requirements.txt
-export DISCORD_TOKEN="your_bot_token_here"
-python main.py
+---
+
+## 🚀 How to Deploy on Render
+
+1. Fork this repo and connect it to [Render](https://render.com/).  
+2. Choose **New Web Service → Python 3**  
+3. Add your environment variable:
