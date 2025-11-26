@@ -82,7 +82,7 @@ class HelpView(View):
         self.bot = bot
         self.author = author
 
-    async def interaction_check(self, interaction):
+    async def interaction_check(self, interaction: discord.Interaction):
         if interaction.user.id != self.author.id:
             await interaction.response.send_message("This help menu belongs to someone else, senpai ✨", ephemeral=True)
             return False
@@ -91,7 +91,7 @@ class HelpView(View):
     # =============== BUTTONS ===============
 
     @discord.ui.button(label="💖 Getting Started", style=discord.ButtonStyle.secondary)
-    async def start_button(self, interaction, button):
+    async def start_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         embed = discord.Embed(
             title="💖 How to Use Mitsukeru",
             description="Follow these simple steps, senpai! ✨",
@@ -121,7 +121,7 @@ class HelpView(View):
         await interaction.response.edit_message(embed=embed, view=self)
 
     @discord.ui.button(label="💢 Issues?", style=discord.ButtonStyle.secondary)
-    async def trouble_button(self, interaction, button):
+    async def trouble_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         embed = discord.Embed(
             title="💢 Troubleshooting",
             description="If I don't respond or can't find the anime, try these steps:",
@@ -153,7 +153,7 @@ class HelpView(View):
         await interaction.response.edit_message(embed=embed, view=self)
 
     @discord.ui.button(label="🎎 Screenshot Rules", style=discord.ButtonStyle.secondary)
-    async def rules_button(self, interaction, button):
+    async def rules_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         embed = discord.Embed(
             title="🎎 Screenshot Requirements",
             description="Mitsukeru has very specific rules. Here’s what works best!",
@@ -197,10 +197,10 @@ class HelpView(View):
         await interaction.response.edit_message(embed=embed, view=self)
 
     @discord.ui.button(label="🌸 More Info", style=discord.ButtonStyle.secondary)
-    async def more_info_button(self, interaction, button):
+    async def more_info_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         embed = discord.Embed(
             title="🌸 Extra Info",
-            description="More details about how I works!",
+            description="More details about how I work!",
             color=discord.Color.green()
         )
 
@@ -232,6 +232,7 @@ class HelpView(View):
         embed.set_footer(text="Knowledge is power, senpai ✨")
 
         await interaction.response.edit_message(embed=embed, view=self)
+
 
 # ---------- MAIN HELP COMMAND ----------
 @bot.tree.command(name="help", description="Open Mitsukeru's help menu.")
@@ -268,7 +269,8 @@ async def on_message(message):
         greet = (
             "👋 **Konnichiwa!** I’m **Mitsukeru** by **Zenyx**!\n"
             "Want to find an anime name or which episode it’s from?\n"
-            "Just upload the screenshot and ping me!! ✨"
+            "Just upload the screenshot and ping me!! ✨\n"
+            "Need Help? send /help"
         )
         await message.channel.send(greet)
         return
