@@ -25,9 +25,12 @@ class MitsukeruBot(discord.Client):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
 
-    async def on_ready(self):
-        await self.tree.sync()
-        print(f"✅ Logged in as {self.user}")
+async def on_ready(self):
+    for guild in self.guilds:
+        await self.tree.sync(guild=guild)
+    print("🌸 Slash commands synced instantly!")
+    print(f"✅ Logged in as {self.user}")
+
 
 bot = MitsukeruBot()
 
