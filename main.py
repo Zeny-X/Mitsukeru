@@ -73,6 +73,189 @@ async def ping(interaction: discord.Interaction):
 
     await interaction.followup.send(embed=embed)
 
+# ---------- /help (Multi-Page with Kawaii Buttons) ----------
+from discord.ui import View, Button
+
+class HelpView(View):
+    def __init__(self, bot, author):
+        super().__init__(timeout=120)
+        self.bot = bot
+        self.author = author
+
+    async def interaction_check(self, interaction):
+        if interaction.user.id != self.author.id:
+            await interaction.response.send_message("This help menu belongs to someone else, senpai ✨", ephemeral=True)
+            return False
+        return True
+
+    # =============== BUTTONS ===============
+
+    @discord.ui.button(label="💖 Getting Started", style=discord.ButtonStyle.secondary)
+    async def start_button(self, interaction, button):
+        embed = discord.Embed(
+            title="💖 How to Use Mitsukeru",
+            description="Follow these simple steps, senpai! ✨",
+            color=discord.Color.pink()
+        )
+
+        embed.add_field(
+            name="📸 Steps:",
+            value=(
+                "1️⃣ Go to **#find-anime🔍**\n"
+                "2️⃣ **Upload a clear anime screenshot**\n"
+                "3️⃣ **Tag me → `@Mitsukeru`**\n"
+                "4️⃣ Wait a moment while I search 🔍\n\n"
+                "**I will show:**\n"
+                "• Anime Title\n"
+                "• Episode Number\n"
+                "• Scene Timestamp\n"
+                "• Similarity %\n"
+                "• Preview Clip"
+            ),
+            inline=False
+        )
+
+        embed.set_thumbnail(url="https://raw.githubusercontent.com/Zeny-X/Mitsukeru/main/Mitsukeru.png")
+        embed.set_footer(text="Mitsukeru • Your anime-finding companion ✨")
+
+        await interaction.response.edit_message(embed=embed, view=self)
+
+    @discord.ui.button(label="💢 Issues?", style=discord.ButtonStyle.secondary)
+    async def trouble_button(self, interaction, button):
+        embed = discord.Embed(
+            title="💢 Troubleshooting",
+            description="If I don't respond or can't find the anime, try these steps:",
+            color=discord.Color.red()
+        )
+
+        embed.add_field(
+            name="🛠️ Common Fixes:",
+            value=(
+                "• Make sure you're in **#find-anime🔍**\n"
+                "• Make sure you **tagged me**\n"
+                "• Try uploading the screenshot again\n"
+                "• Check if I am online using `/ping`\n"
+                "• I may be slow sometimes\n"
+                "• Preview clip may load slowly or be unavailable"
+            ),
+            inline=False
+        )
+
+        embed.add_field(
+            name="📌 Reminder:",
+            value="**Mitsukeru only finds real anime screenshots.** Not artwork, edits, drawings, etc.",
+            inline=False
+        )
+
+        embed.set_thumbnail(url="https://raw.githubusercontent.com/Zeny-X/Mitsukeru/main/Mitsukeru.png")
+        embed.set_footer(text="Troubles don't last forever, senpai 💫")
+
+        await interaction.response.edit_message(embed=embed, view=self)
+
+    @discord.ui.button(label="🎎 Screenshot Rules", style=discord.ButtonStyle.secondary)
+    async def rules_button(self, interaction, button):
+        embed = discord.Embed(
+            title="🎎 Screenshot Requirements",
+            description="Mitsukeru has very specific rules. Here’s what works best!",
+            color=discord.Color.blurple()
+        )
+
+        embed.add_field(
+            name="✔️ Good Screenshots:",
+            value=(
+                "• Original 16:9 anime screenshots\n"
+                "• Clear characters and colors\n"
+                "• Resolution above **320×180**"
+            ),
+            inline=False
+        )
+
+        embed.add_field(
+            name="❌ Bad Screenshots:",
+            value=(
+                "• Cropped images\n"
+                "• Heavy filters, grayscale, tinted\n"
+                "• Flipped or mirrored images\n"
+                "• Very dark scenes\n"
+                "• Too much text/subtitles blocking\n"
+                "• Borders around the screenshot\n"
+                "• Real-life photos of screens\n"
+                "• Non-anime (e.g., cartoons)"
+            ),
+            inline=False
+        )
+
+        embed.add_field(
+            name="📌 Important:",
+            value="I rely on **exact color layouts** — big changes break detection.",
+            inline=False
+        )
+
+        embed.set_thumbnail(url="https://raw.githubusercontent.com/Zeny-X/Mitsukeru/main/Mitsukeru.png")
+        embed.set_footer(text="Perfect screenshots = perfect results ✨")
+
+        await interaction.response.edit_message(embed=embed, view=self)
+
+    @discord.ui.button(label="🌸 More Info", style=discord.ButtonStyle.secondary)
+    async def more_info_button(self, interaction, button):
+        embed = discord.Embed(
+            title="🌸 Extra Info",
+            description="More details about how I works!",
+            color=discord.Color.green()
+        )
+
+        embed.add_field(
+            name="📚 Anime Database:",
+            value=(
+                "• Most anime from **2000+** are indexed\n"
+                "• Some popular 1990s anime included\n"
+                "• Older anime (pre-1990) may not be indexed\n"
+                "• Some long-running anime may be incomplete:\n"
+                "  - Dragon Ball / Pokemon / Conan / Doraemon\n"
+            ),
+            inline=False
+        )
+
+        embed.add_field(
+            name="🎯 Accuracy Tips:",
+            value=(
+                "• Use full 16:9 screenshots\n"
+                "• Avoid cropping or borders\n"
+                "• Avoid dark, blurry, or low-detail shots\n"
+                "• Avoid filters, tints, brightness edits\n"
+                "• Make sure the image is not flipped"
+            ),
+            inline=False
+        )
+
+        embed.set_thumbnail(url="https://raw.githubusercontent.com/Zeny-X/Mitsukeru/main/Mitsukeru.png")
+        embed.set_footer(text="Knowledge is power, senpai ✨")
+
+        await interaction.response.edit_message(embed=embed, view=self)
+
+# ---------- MAIN HELP COMMAND ----------
+@bot.tree.command(name="help", description="Open Mitsukeru's help menu.")
+async def help_cmd(interaction: discord.Interaction):
+
+    embed = discord.Embed(
+        title="🌸 Mitsukeru Help Menu",
+        description="Choose a category below! ✨",
+        color=discord.Color.pink()
+    )
+
+    embed.add_field(
+        name="💖 Welcome!",
+        value="Use the buttons below to navigate through help pages!",
+        inline=False
+    )
+
+    embed.set_thumbnail(url="https://raw.githubusercontent.com/Zeny-X/Mitsukeru/main/Mitsukeru.png")
+    embed.set_footer(text="Mitsukeru • Always here to help you find anime 💞")
+
+    view = HelpView(bot, interaction.user)
+    await interaction.response.send_message(embed=embed, view=view)
+
+
 # ---------- on_message (anime search + ping mention) ----------
 @bot.event
 async def on_message(message):
